@@ -1,0 +1,31 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - echo "=== Installation des dependances ==="
+      - pip install -r requirements.txt
+
+  pre_build:
+    commands:
+      - echo "=== Execution des tests unitaires ==="
+      - pytest test_app.py -v
+
+  build:
+    commands:
+      - echo "=== Build reussi - preparation du package ==="
+      - echo "Version $CODEBUILD_BUILD_NUMBER deployee le $(date)"
+
+  post_build:
+    commands:
+      - echo "=== Pipeline termine avec succes ==="
+
+artifacts:
+  files:
+    - app.py
+    - requirements.txt
+    - Procfile
+    - .ebextensions/**/*
+  discard-paths: no
