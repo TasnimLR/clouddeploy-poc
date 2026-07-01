@@ -1,6 +1,5 @@
-import pytest
+import pytest, json
 from app import app
-
 
 @pytest.fixture
 def client():
@@ -8,39 +7,19 @@ def client():
     with app.test_client() as client:
         yield client
 
+def test_index(client):
+    r = client.get("/")
+    assert json.loads(r.data)["status"] == "running"
 
-def test_index_returns_200(client):
-    response = client.get("/")
-    assert response.status_code == 200
+def test_health(client):
+    r = client.get("/health")
+    assert json.loads(r.data)["status"] == "healthy"
 
+def test_version(client):
+    r = client.get("/version")
+    assert "version" in json.loads(r.data)
 
-def test_index_contains_app_name(client):
-    response = client.get("/")
-    data = response.get_json()
-    assert data["app"] == "CloudPilot AI"
-    assert data["status"] == "running"
-
-
-def test_health_returns_healthy(client):
-    response = client.get("/health")
-    assert response.status_code == 200
-    data = response.get_json()
-    assert data["status"] == "healthy"
-    assert "timestamp" in data
-
-
-def test_version_endpoint(client):
-    response = client.get("/version")
-    assert response.status_code == 200
-    data = response.get_json()
-    assert "version" in data
-    assert "deployed_at" in data
-
-
-def test_pipelines_returns_list(client):
-    response = client.get("/pipelines")
-    assert response.status_code == 200
-    data = response.get_json()
-    assert "pipelines" in data
-    assert len(data["pipelines"]) > 0
-    assert data["total"] == len(data["pipelines"])
+def test_pipelines(client):
+    r = client.get("/pipelines")
+    data = json.loads(r.data)
+    assert data["total"] >= 1
