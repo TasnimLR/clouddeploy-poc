@@ -29,7 +29,5 @@ jobs:
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts 2>/dev/null
-          scp -i ~/.ssh/deploy_key app.py "$EC2_USER@$EC2_HOST:~/app.py"
-          ssh -i ~/.ssh/deploy_key "$EC2_USER@$EC2_HOST" \
-            "pkill -f 'python3 app.py' || true; sleep 1; nohup python3 ~/app.py > /tmp/app.log 2>&1 & sleep 2 && curl -s http://localhost:5000/health"
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o ConnectTimeout=10 app.py "$EC2_USER@$EC2_HOST:~/app.py"
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o ConnectTimeout=10 "$EC2_USER@$EC2_HOST" "pkill -f 'python3 app.py' || true; sleep 1; nohup python3 ~/app.py > /tmp/app.log 2>&1 & sleep 2 && curl -s http://localhost:5000/health"
